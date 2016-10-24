@@ -12,7 +12,7 @@ channel.queue_declare(queue='firstqueue')
 i = 0
 
 while True:
-  message = base64.b64encode(os.urandom(int(random.uniform(1,20)*15)))
+  message = base64.b64encode(os.urandom(int(random.uniform(1,20)*3)))
   channel.basic_publish(exchange='',
                       routing_key='firstqueue',
                       body=message,
