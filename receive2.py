@@ -41,15 +41,18 @@ def callback(ch, method, properties, body):
     print(nextflagraw)
   elif body[:3] == inttoseqchar(nextflagraw):
     print("Received : " + body)
-    fullbody = fullbody + body[3:]
+    #fullbody = fullbody + body[3:]
+    print(obj.decrypt(body[3:]))
     nextflagraw = nextflagraw ^ xor_message_chunk(body[4:])
   elif body[:3] == inttoseqchar(nextflagraw ^ int(firstflag,16)):
     print("Received : " + body)
-    fullbody = fullbody + body[3:]
-    print("Decoded  : " + obj.decrypt(fullbody))
+    #fullbody = fullbody + body[3:]
+    print(obj.decrypt(body[3:]))
+    #print("Decoded  : " + obj.decrypt(fullbody))
     fullbody = ''
     print(totaltime)
     totaltime = 0
+    print(20*'-')
   totaltime = totaltime + time.clock() - timenow
 
   ch.basic_ack(delivery_tag = method.delivery_tag)

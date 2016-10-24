@@ -43,24 +43,22 @@ message = ' '.join(sys.argv[1:]) or "This page contains examples on basic concep
 totalpadding = 32 - (len(message)%32)
 message = message + totalpadding*' '
 
-#encrypt first
-ciphertext = obj.encrypt(message)
-
 print("__________SENDING__________")
 
 i = 0
 
-while i != len(ciphertext)/32:
-  if i == (len(ciphertext)/32)-1:
+while i != len(message)/32:
+  if i == (len(message)/32)-1:
     nextflagraw = nextflagraw ^ int(initialflag,16)
-  itemtobesent = inttoseqchar(nextflagraw) + ciphertext[(i)*32:(i+1)*32]
+  #chop and encrypt
+  itemtobesent = inttoseqchar(nextflagraw) + obj.encrypt(message[(i)*32:(i+1)*32])
   channel.basic_publish(exchange='',
                       routing_key='firstqueue',
                       #routing_key='secondqueue',
                       body= itemtobesent,
                       properties=pika.BasicProperties(delivery_mode = 2,))
   print("[v] %s is sent" % itemtobesent)
-  time.sleep(random.uniform(0,1.5))
+  #time.sleep(random.uniform(0,1.5))
   nextflagraw = nextflagraw ^ xor_message_chunk(itemtobesent[4:])
-  body = ciphertext[(i)*32:(i+1)*32]
+  body = message[(i)*32:(i+1)*32]
   i = i + 1
