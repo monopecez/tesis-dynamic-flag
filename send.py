@@ -3,6 +3,7 @@ import sys
 import random
 import time
 import base64
+import os
 
 connection = pika.BlockingConnection(pika.ConnectionParameters('localhost'))
 channel = connection.channel()
@@ -12,15 +13,13 @@ channel.queue_declare(queue='firstqueue')
 
 message = ' '.join(sys.argv[1:]) or "Hello World!"
 
-'''
-message = base64.b64encode(message)
-if len(message) < 10:
-  lenmessage = '0' + str(len(message))
-elif len(message) > 99:
-  lenmessage = '99'
-else:
-  lenmessage = str(len(message))
-'''
+IV = int(os.urandom(3).encode('hex'),16)
+channel.basic_publish(exchange='',
+                      routing_key='firstqueue',
+                      #routing_key='secondqueue',
+                      body= "IVIVIV" + str(IV),
+                      properties=pika.BasicProperties(delivery_mode = 2,))
+print("[v] %r : IV is sent" % IV)
 
 totalpadding = 32 - (len(message)%32)
 message = message + totalpadding*'F'
