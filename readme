@@ -1,0 +1,18 @@
+Program Stego-Kripto dengan Penanda Dinamis | Isman Junian Rahman
+
+Requirement:
+- python 2.7
+- RabbitMQ
+
+Ada 4 file:
+- receive.py
+  menerima semua yang dikirimkan oleh sender (send.py) dan juga noise (sendnoise.py). kemudian akan dipilah antara message dan noise. Jika ditemukan message, maka akan di-forward ke receiver2 (receive2.py) untuk diproses/di-decode/di-decipher 
+
+- receive2.py 
+  memproses semua pesan yang dikirimkan dari receiver1 (receive.py)
+
+- send.py
+  pengirim message. cukup jalankan "send.py" maka akan mengirimkan pesan yang telah didefinisikan di program atau "send.py pesan_yang_akan_dikirim"
+
+- sendnoise.py
+  pengirim noise
