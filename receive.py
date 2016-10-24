@@ -22,9 +22,10 @@ def xor_message_chunk(message):
     nextflagraw = nextflagraw ^ item
   return nextflagraw
 
-def inttob64(numba):
-  b64 = base64.b64encode(hex(numba)[2:].zfill(6).decode('hex'))
-  return b64
+def inttoseqchar(number):
+  numberinhex = hex(number)[2:].zfill(6)
+  listnya = [chr(int(numberinhex[i:i+2],16)) for i in range(0, 6, 2)]
+  return ''.join(listnya)  
 
 def callback(ch, method, properties, body):
   global nextflag
@@ -33,7 +34,8 @@ def callback(ch, method, properties, body):
   #print(body)
   print(body,end=''),
   ch.basic_ack(delivery_tag = method.delivery_tag)
-  if (nextflag != "") and (body.find(inttob64(nextflagraw))) != -1:
+  if (nextflag != "") and (body.find(inttoseqchar(nextflagraw))) != -1:
+      print("FLAG MATCH")
       channel2.basic_publish(exchange='',
                       routing_key='secondqueue',
                       body=body,
@@ -41,17 +43,19 @@ def callback(ch, method, properties, body):
       #print(nextflagraw)
       #print(xor_message_chunk(body[4:]))
       nextflagraw = nextflagraw ^ xor_message_chunk(body[4:])
-      #print (str(nextflag) + " ---- " + inttob64(nextflagraw))
+      #print (str(nextflag) + " ---- " + inttoseqchar(nextflagraw))
   elif body.find('IVIVIV') != -1:
+      print("FOUND IV")
       nextflagraw = int(body[6:]) ^ int(initialflag,16) #integer
-      nextflag = inttob64(nextflagraw) #string
+      nextflag = inttoseqchar(nextflagraw) #string
       channel2.basic_publish(exchange='',
                       routing_key='secondqueue',
                       body=body,
                       properties=pika.BasicProperties(delivery_mode = 2,))
       #print (nextflag) #string
       #print (nextflagraw) #integer
-  elif body.find(inttob64(nextflagraw ^ int(initialflag,16))) != -1:
+  elif body.find(inttoseqchar(nextflagraw ^ int(initialflag,16))) != -1:
+      print("LAST FLAG")
       channel2.basic_publish(exchange='',
                       routing_key='secondqueue',
                       body=body,
