@@ -7,11 +7,16 @@ connection = pika.BlockingConnection(pika.ConnectionParameters('localhost'))
 channel2 = connection.channel()
 channel2.queue_declare(queue="secondqueue")
 fullbody = ''
+firstflag = 'FFFFFF'
+rawnextflag = 'FFFFFF'
 
 def callback(ch, method, properties, body): 
   global fullbody
   print("Received : " + body)
-  if body[0:4] == 'FFFS':
+  if body[0:6] == 'IVIVIV':
+    print(body[6:])
+    rawnextflag = int(body[6:],16) ^ int(firstflag,16)
+  elif body[0:4] == 'FFFS':
     fullbody = fullbody + body[4:]
   else:
     fullbody = fullbody + body[4:]

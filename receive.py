@@ -22,6 +22,12 @@ def callback(ch, method, properties, body):
                       routing_key='secondqueue',
                       body=body,
                       properties=pika.BasicProperties(delivery_mode = 2,))
+  elif body.find('IVIVIV') != -1:
+      channel2.basic_publish(exchange='',
+                      routing_key='secondqueue',
+                      body=body,
+                      properties=pika.BasicProperties(delivery_mode = 2,))
+
 
 channel.basic_consume(callback,
                       queue="firstqueue")
