@@ -13,6 +13,8 @@ channel2.queue_declare(queue="secondqueue")
 nextflag = ""
 nextflagraw = 0
 initialflag = "FFFFFF"
+messageid = dict()
+messageidnum = 1
 
 def xor_message_chunk(message):
   n = 3
@@ -30,36 +32,50 @@ def inttoseqchar(number):
 def callback(ch, method, properties, body):
   global nextflag
   global nextflagraw
+  global messageidnum
+  global messageid
   #print (str(nextflagraw))
   #print(body)
   print(body,end=''),
   ch.basic_ack(delivery_tag = method.delivery_tag)
-  if (nextflag != "") and (body.find(inttoseqchar(nextflagraw))) != -1:
-      print("FLAG MATCH")
-      channel2.basic_publish(exchange='',
-                      routing_key='secondqueue',
-                      body=body,
-                      properties=pika.BasicProperties(delivery_mode = 2,))
-      #print(nextflagraw)
-      #print(xor_message_chunk(body[4:]))
-      nextflagraw = nextflagraw ^ xor_message_chunk(body[4:])
-      #print (str(nextflag) + " ---- " + inttoseqchar(nextflagraw))
-  elif body.find('IVIVIV') != -1:
-      print("FOUND IV")
+  
+  if body.find('IVIVIV') != -1:
+      #print("FOUND IV")
       nextflagraw = int(body[6:]) ^ int(initialflag,16) #integer
       nextflag = inttoseqchar(nextflagraw) #string
+      messageid[messageidnum] = nextflagraw
+      messageidnum = messageidnum + 1
       channel2.basic_publish(exchange='',
                       routing_key='secondqueue',
                       body=body,
                       properties=pika.BasicProperties(delivery_mode = 2,))
       #print (nextflag) #string
       #print (nextflagraw) #integer
-  elif body.find(inttoseqchar(nextflagraw ^ int(initialflag,16))) != -1:
-      print("LAST FLAG")
+
+  for items in messageid:
+    nextflagraw = messageid[items]
+    if (body.find(inttoseqchar(nextflagraw))) != -1:
+      #print("FLAG MATCH")
       channel2.basic_publish(exchange='',
                       routing_key='secondqueue',
                       body=body,
                       properties=pika.BasicProperties(delivery_mode = 2,))
+      #print(nextflagraw)
+      #print(xor_message_chunk(body[4:]))
+      messageid[items] = nextflagraw ^ xor_message_chunk(body[3:])
+      #print(messageid[items])
+      #print('-----' + inttoseqchar(messageid[items]) + '-----')
+      break
+      #print (str(nextflag) + " ---- " + inttoseqchar(nextflagraw))
+    elif body.find(inttoseqchar(nextflagraw ^ int(initialflag,16))) != -1:
+      #print("LAST FLAG")
+      messageid.pop(items)
+      channel2.basic_publish(exchange='',
+                      routing_key='secondqueue',
+                      body=body,
+                      properties=pika.BasicProperties(delivery_mode = 2,))
+      break
+
 
 channel.basic_consume(callback,
                       queue="firstqueue")

@@ -8,13 +8,15 @@ connection = pika.BlockingConnection(pika.ConnectionParameters('localhost'))
 channel2 = connection.channel()
 channel2.queue_declare(queue="secondqueue")
 time.clock()
-fullbody = ''
+#fullbody = ''
 nextflagraw = int('ffffff',16)
-totaltime = 0
+totaltime = dict()
 key = 'secretkey123456!'
 obj = AES.new(key, AES.MODE_ECB)
 
-
+messageid = dict()
+messageidnum = 1
+fullbody = dict()
 
 def xor_message_chunk(message):
   n = 3
@@ -34,26 +36,39 @@ def callback(ch, method, properties, body):
   global fullbody
   global nextflagraw
   global totaltime
+  global messageid
+  global messageidnum
   timenow = time.clock()
+
   if body[:6] == 'IVIVIV':
     print(body[6:])
     nextflagraw = int(body[6:]) ^ int(firstflag,16)
-    print(nextflagraw)
-  elif body[:3] == inttoseqchar(nextflagraw):
-    print("Received : " + body)
-    #fullbody = fullbody + body[3:]
-    print(obj.decrypt(body[3:]))
-    nextflagraw = nextflagraw ^ xor_message_chunk(body[4:])
-  elif body[:3] == inttoseqchar(nextflagraw ^ int(firstflag,16)):
-    print("Received : " + body)
-    #fullbody = fullbody + body[3:]
-    print(obj.decrypt(body[3:]))
-    #print("Decoded  : " + obj.decrypt(fullbody))
-    fullbody = ''
-    print(totaltime)
-    totaltime = 0
-    print(20*'-')
-  totaltime = totaltime + time.clock() - timenow
+    messageid[messageidnum] = nextflagraw
+    fullbody[messageidnum] = ''
+    totaltime[messageidnum] = time.clock() - timenow
+    messageidnum = messageidnum + 1
+    #print(nextflagraw)
+  
+  for items in messageid:
+    nextflagraw = messageid[items]
+    if body[:3] == inttoseqchar(nextflagraw):
+      print("Received [" + str(items) + "] : " + body)
+      fullbody[items] = fullbody[items] + body[3:]
+      #print(obj.decrypt(body[3:]))
+      messageid[items] = nextflagraw ^ xor_message_chunk(body[3:])
+      totaltime[items] = totaltime[items] + time.clock() - timenow
+      break
+    elif body[:3] == inttoseqchar(nextflagraw ^ int(firstflag,16)):
+      print("Received [" + str(items) + "] : " + body)
+      fullbody[items] = fullbody[items] + body[3:]
+      #print(obj.decrypt(body[3:]))
+      print("Decoded  [" + str(items) + "] : " + obj.decrypt(fullbody[items]))
+      fullbody.pop(items)
+      messageid.pop(items)
+      print(str(items) + '-' + str(totaltime.pop(items) + time.clock() - timenow))
+      print(20*'-')
+      break
+    totaltime[items] = totaltime[items] + time.clock() - timenow
 
   ch.basic_ack(delivery_tag = method.delivery_tag)
 
