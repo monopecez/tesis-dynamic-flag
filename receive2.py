@@ -43,7 +43,7 @@ def callback(ch, method, properties, body):
   if body[:6] == 'IVIVIV':
     print(body[6:])
     nextflagraw = int(body[6:]) ^ int(firstflag,16)
-    messageid[messageidnum] = nextflagraw
+    messageid[messageidnum] = [nextflagraw, nextflagraw + 1]
     fullbody[messageidnum] = ''
     totaltime[messageidnum] = time.clock() - timenow
     messageidnum = messageidnum + 1
@@ -51,14 +51,23 @@ def callback(ch, method, properties, body):
   
   for items in messageid:
     nextflagraw = messageid[items]
-    if body[:3] == inttoseqchar(nextflagraw):
+    if body[:3] == inttoseqchar(nextflagraw[0]):
       print("Received [" + str(items) + "] : " + body)
       fullbody[items] = fullbody[items] + body[3:]
       #print(obj.decrypt(body[3:]))
-      messageid[items] = nextflagraw ^ xor_message_chunk(body[3:])
+      messageid[items][0] = nextflagraw[0] ^ xor_message_chunk(body[3:])
       totaltime[items] = totaltime[items] + time.clock() - timenow
       break
-    elif body[:3] == inttoseqchar(nextflagraw ^ int(firstflag,16)):
+    elif body[:3] == inttoseqchar(nextflagraw[1]):
+      #print("MASUUUUK")
+      print("Received [" + str(items) + "] : " + body)
+      fullbody[items] = fullbody[items] + body[3:]
+      #print(obj.decrypt(body[3:]))
+      messageid[items][0] = nextflagraw[1] ^ xor_message_chunk(body[3:])
+      messageid[items][1] = nextflagraw[1] + 1
+      totaltime[items] = totaltime[items] + time.clock() - timenow
+      break
+    elif body[:3] == inttoseqchar(nextflagraw[0] ^ int(firstflag,16)):
       print("Received [" + str(items) + "] : " + body)
       fullbody[items] = fullbody[items] + body[3:]
       #print(obj.decrypt(body[3:]))
