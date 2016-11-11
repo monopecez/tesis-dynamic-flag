@@ -60,16 +60,16 @@ except:
 
 
 #message = "This page contains examples on basic concepts" # of C programming like: loops, functions, pointers, structures etc. All the examples in this page are tested and verified on GNU GCC compiler, although almost every program on in this website will work on any compiler you use. Feel free to copy the source code and execute it in your device."
-totalpadding = 32 - (len(message)%32)
-message = message + totalpadding*' '
+#totalpadding = 32 - (len(message)%32)
+#message = message + totalpadding*' '
 
 print("__________SENDING__________")
 
 i = 0
 
-while i != len(message)/32:
+while i != len(message)/32 + 1:
   #print(str(nextflagraw) + ' ----- ' ),
-  if i == (len(message)/32)-1:
+  if i == (len(message)/32):
     nextflagraw = nextflagraw ^ int(initialflag,16)
     skip = True
   if i%4 == 0:
