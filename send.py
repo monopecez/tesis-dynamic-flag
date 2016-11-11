@@ -5,6 +5,7 @@ import time
 import base64
 import os
 from Crypto.Cipher import AES
+from Crypto.Cipher import ChaCha20
 
 def xor_message_chunk(message):
   n = 3 #flag size (bytes)
@@ -19,8 +20,9 @@ def inttoseqchar(number):
   listnya = [chr(int(numberinhex[i:i+2],16)) for i in range(0, 6, 2)]
   return ''.join(listnya)
 
-key = 'secretkey123456!'
-obj = AES.new(key, AES.MODE_ECB)
+key = 'secretkey123456!' + 'secretkey123456!'
+#obj = AES.new(key, AES.MODE_ECB)
+encipher = ChaCha20.new(key = key)
 
 connection = pika.BlockingConnection(pika.ConnectionParameters('localhost'))
 channel = connection.channel()
@@ -28,16 +30,17 @@ channel = connection.channel()
 channel.queue_declare(queue='firstqueue')
 
 skip = False
-IV = int(os.urandom(3).encode('hex'),16)
+IV = encipher.nonce
 channel.basic_publish(exchange='',
                       routing_key='firstqueue',
                       #routing_key='secondqueue',
                       body= "IVIVIV" + str(IV),
                       properties=pika.BasicProperties(delivery_mode = 2,))
-print("[v] %r : IV is sent" % IV)
+print("[v] %s : IV is sent --->" % IV),
 initialflag = "FFFFFF"
 
-nextflagraw = IV ^ int(initialflag,16)
+nextflagraw = xor_message_chunk(IV) ^ int(initialflag,16)
+print("%s" % inttoseqchar(nextflagraw))
 IVraw = nextflagraw
 message = ' '.join(sys.argv[1:])
 
@@ -75,7 +78,8 @@ while i != len(message)/32:
       nextflagraw = IVraw + i/4
   #print(str(nextflagraw))
   #chop and encrypt
-  itemtobesent = inttoseqchar(nextflagraw) + obj.encrypt(message[(i)*32:(i+1)*32])
+  #itemtobesent = inttoseqchar(nextflagraw) + obj.encrypt(message[(i)*32:(i+1)*32])
+  itemtobesent = inttoseqchar(nextflagraw) + encipher.encrypt(message[(i)*32:(i+1)*32])
   channel.basic_publish(exchange='',
                       routing_key='firstqueue',
                       #routing_key='secondqueue',

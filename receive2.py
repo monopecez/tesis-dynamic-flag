@@ -3,6 +3,7 @@ import pika
 import time
 import base64
 from Crypto.Cipher import AES
+from Crypto.Cipher import ChaCha20
 
 connection = pika.BlockingConnection(pika.ConnectionParameters('localhost'))
 channel2 = connection.channel()
@@ -11,8 +12,9 @@ time.clock()
 #fullbody = ''
 nextflagraw = int('ffffff',16)
 totaltime = dict()
-key = 'secretkey123456!'
-obj = AES.new(key, AES.MODE_ECB)
+decipher = dict()
+key = 'secretkey123456!' + 'secretkey123456!'
+#obj = AES.new(key, AES.MODE_ECB)
 
 messageid = dict()
 messageidnum = 1
@@ -38,12 +40,15 @@ def callback(ch, method, properties, body):
   global totaltime
   global messageid
   global messageidnum
+  global decipher
   timenow = time.clock()
 
   if body[:6] == 'IVIVIV':
     print(body[6:])
-    nextflagraw = int(body[6:]) ^ int(firstflag,16)
-    messageid[messageidnum] = [nextflagraw, nextflagraw + 1]
+    nextflagraw = body[6:] # nextflagraw = nonce
+    decipher[messageidnum] = ChaCha20.new(key = key, nonce = nextflagraw)
+    nextflag = xor_message_chunk(nextflagraw) ^ int(firstflag,16)
+    messageid[messageidnum] = [nextflag, nextflag + 1]
     fullbody[messageidnum] = ''
     totaltime[messageidnum] = time.clock() - timenow
     messageidnum = messageidnum + 1
@@ -71,7 +76,7 @@ def callback(ch, method, properties, body):
       print("Received [" + str(items) + "] : " + body)
       fullbody[items] = fullbody[items] + body[3:]
       #print(obj.decrypt(body[3:]))
-      print("Decoded  [" + str(items) + "] : " + obj.decrypt(fullbody[items]))
+      print("Decoded  [" + str(items) + "] : " + decipher[items].decrypt(fullbody[items]))
       fullbody.pop(items)
       messageid.pop(items)
       print(str(items) + '-' + str(totaltime.pop(items) + time.clock() - timenow))

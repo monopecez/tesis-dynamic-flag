@@ -41,9 +41,9 @@ def callback(ch, method, properties, body):
   
   if body.find('IVIVIV') != -1:
       #print("FOUND IV")
-      nextflagraw = int(body[6:]) ^ int(initialflag,16) #integer
-      nextflag = inttoseqchar(nextflagraw) #string
-      messageid[messageidnum] = [nextflagraw, nextflagraw + 1]
+      nextflagraw = body[6:] #integer
+      nextflag = xor_message_chunk(nextflagraw) ^ int(initialflag,16) #string
+      messageid[messageidnum] = [nextflag, nextflag + 1]
       messageidnum = messageidnum + 1
       channel2.basic_publish(exchange='',
                       routing_key='secondqueue',
