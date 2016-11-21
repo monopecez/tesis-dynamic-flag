@@ -9,6 +9,8 @@ from Crypto.Cipher import ChaCha20
 
 def xor_message_chunk(message):
   n = 3 #flag size (bytes)
+  if len(message) % 3 != 0:
+    message = (n - len(message) % n) * "\x00" + message
   listnya = [int(message[i:i+n].encode('hex'),16) for i in range(0, len(message), n)]
   nextflagraw = 0
   for item in listnya:
