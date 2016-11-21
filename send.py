@@ -39,9 +39,11 @@ channel.basic_publish(exchange='',
                       body= "IVIVIV" + str(IV),
                       properties=pika.BasicProperties(delivery_mode = 2,))
 print("[v] %s : IV is sent --->" % IV),
+print(IV.encode('hex') + '   ')
 initialflag = "FFFFFF"
-
+print("XOR-ed to: "),
 nextflagraw = xor_message_chunk(IV) ^ int(initialflag,16)
+print(hex(nextflagraw)[2:] + '   '),
 print("%s" % inttoseqchar(nextflagraw))
 IVraw = nextflagraw
 message = ' '.join(sys.argv[1:])
