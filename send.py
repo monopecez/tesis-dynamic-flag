@@ -23,7 +23,7 @@ def inttoseqchar(number):
   return ''.join(listnya)
 
 key = 'secretkey123456!' + 'secretkey123456!'
-#obj = AES.new(key, AES.MODE_ECB)
+obj = AES.new(key, AES.MODE_ECB)
 encipher = ChaCha20.new(key = key)
 
 connection = pika.BlockingConnection(pika.ConnectionParameters('localhost'))
@@ -58,7 +58,7 @@ try:
   elif sys.argv[1] == 'short6':
     message = "01234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"    
   elif sys.argv[1] == 'long':
-    message = 100*"01234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+    message = 10*"01234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
 
 except:
   message = "This page contains examples on basic concepts of C programming like: loops, functions, pointers, structures etc. All the examples in this page are tested and verified on GNU GCC compiler, although almost every program on in this website will work on any compiler you use. Feel free to copy the source code and execute it in your device."
@@ -84,6 +84,7 @@ while i != len(message)/32 + 1:
   #print(str(nextflagraw))
   #chop and encrypt
   #itemtobesent = inttoseqchar(nextflagraw) + obj.encrypt(message[(i)*32:(i+1)*32])
+  encipher = ChaCha20.new(key = key, nonce = IV)
   itemtobesent = inttoseqchar(nextflagraw) + encipher.encrypt(message[(i)*32:(i+1)*32])
   channel.basic_publish(exchange='',
                       routing_key='firstqueue',

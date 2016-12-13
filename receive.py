@@ -2,6 +2,7 @@ from __future__ import print_function
 import pika
 import time
 import base64
+import random
 
 connection = pika.BlockingConnection(pika.ConnectionParameters('localhost'))
 channel = connection.channel()
@@ -59,6 +60,16 @@ def callback(ch, method, properties, body):
     #print(nextflagraw)
     if (body.find(inttoseqchar(nextflagraw[0]))) != -1:
       #print(" NORMAL FLAG MATCH")
+      if random.random() < 0.1:
+        print("--CHAR CORRUPTED--")
+        nochartobecorrupted = random.randint(0,len(body))
+        if nochartobecorrupted == len(body):
+          nochartobecorrupted = nochartobecorrupted - 1
+        #print(nochartobecorrupted)
+        chartobecorrupted = body[nochartobecorrupted]
+        corruptedchar = chr(int(chartobecorrupted.encode('hex'),16) + 1)
+        #corruptedchar = chr(random.randint(0,255))
+        body = body[:nochartobecorrupted] + corruptedchar + body[nochartobecorrupted+1:]
       channel2.basic_publish(exchange='',
                       routing_key='secondqueue',
                       body=body,
@@ -71,7 +82,7 @@ def callback(ch, method, properties, body):
       break
       #print (str(nextflag) + " ---- " + inttoseqchar(nextflagraw))
     elif (body.find(inttoseqchar(nextflagraw[1]))) != -1:
-      #print("--------IV + 1 ---------")
+      #print("--------IV + 256 ---------")
       channel2.basic_publish(exchange='',
                       routing_key='secondqueue',
                       body=body,
