@@ -43,7 +43,7 @@ def callback(ch, method, properties, body):
   print(body,end=''),
   global counter2
   ch.basic_ack(delivery_tag = method.delivery_tag)
-  errordi = 1
+  errordi = 12
   counter2 = counter2 + 1
   
   if body.find('IVIVIV') != -1:
@@ -64,7 +64,7 @@ def callback(ch, method, properties, body):
     nextflagraw = messageid[items]
     #print(nextflagraw)
     if (body.find(inttoseqchar(nextflagraw[0]))) != -1:
-      #print(" NORMAL FLAG MATCH")
+      print("--NORMAL FLAG MATCH--")
       if counter2 == errordi:
         #print("--CHAR CORRUPTED--")
         nochartobecorrupted = random.randint(3,len(body))
@@ -87,7 +87,7 @@ def callback(ch, method, properties, body):
       break
       #print (str(nextflag) + " ---- " + inttoseqchar(nextflagraw))
     elif (body.find(inttoseqchar(nextflagraw[1]))) != -1:
-      print("resync")
+      print("--resync--")
       if counter2 == errordi:
         #print("--CHAR CORRUPTED--"),
         nochartobecorrupted = random.randint(3,len(body))

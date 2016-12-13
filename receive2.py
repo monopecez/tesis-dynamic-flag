@@ -99,16 +99,13 @@ def callback(ch, method, properties, body):
       print("LAST FLAG")
       print("Received [" + str(items) + "] : " + body)
       decipher[items] = ChaCha20.new(key = key, nonce = iv[items])
-      if counter[items] != 4:
-        fullbody[items] = fullbody[items] + "--ADA YANG HILANG--" + decipher[items].decrypt(body[3:])
-      else:
-        fullbody[items] = fullbody[items] + decipher[items].decrypt(body[3:])
+      fullbody[items] = fullbody[items] + decipher[items].decrypt(body[3:])
       print(fullbody[items])
       #print(decipher[items].decrypt(body[3:]))
       #print("Decoded  [" + str(items) + "] : " + decipher[items].decrypt(fullbody[items]))
       fullbody.pop(items)
       messageid.pop(items)
-      print(str(items) + '-' + str(totaltime.pop(items) + time.clock() - timenow))
+      #print(str(items) + '-' + str(totaltime.pop(items) + time.clock() - timenow))
       print(20*'-')
       break
     totaltime[items] = totaltime[items] + time.clock() - timenow
