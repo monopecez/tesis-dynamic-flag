@@ -58,6 +58,7 @@ def callback(ch, method, properties, body):
                       routing_key='secondqueue',
                       body=body,
                       properties=pika.BasicProperties(delivery_mode = 2,))
+      print()
       counter2 = 0
       #print (nextflag) #string
       #print (nextflagraw) #integer

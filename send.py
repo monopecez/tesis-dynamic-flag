@@ -83,19 +83,19 @@ while i != len(message)/32 + 1:
     
   if i%4 == 0:
     # 4 karena kirim iv setiap 4 message sekali
-    print("resync")
+    #print("resync")
     if not isLast:
-      print("cuma resync")
+      #print("cuma resync")
       nextflagraw = IVraw + 256 * (i/4)
     else:
-      print("tambah isLast")
+      #print("tambah isLast")
       nextflagraw = (IVraw + 256 * (i/4)) ^ int(initialflag,16)
-      print nextflagraw
+      #print nextflagraw
   
   if isLast:
-    print("tambah lagi isLast")
+    #print("tambah lagi isLast")
     nextflagraw = (IVraw + (256 * ((i/4)+1)) ^ int(initialflag,16))
-    print nextflagraw
+    #print nextflagraw
 
   #print(str(nextflagraw))
   #chop and encrypt

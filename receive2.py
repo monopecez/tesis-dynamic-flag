@@ -70,12 +70,14 @@ def callback(ch, method, properties, body):
   
   for items in messageid:
     nextflagraw = messageid[items]
+    '''
     print(nextflagraw[0],end=' ')
     print(nextflagraw[0] ^ int(initialflag,16))
     print(nextflagraw[1],end=' ')
     print(nextflagraw[1] ^ int(initialflag,16))
     print(nextflagraw[1] + 256,end=' ')
     print((nextflagraw[1] + 256 )^ int(initialflag,16))
+    '''
 
     if body[:3] == inttoseqchar(nextflagraw[0]):
       print("NORMAL FLAG")
@@ -100,11 +102,11 @@ def callback(ch, method, properties, body):
       messageid[items][0] = nextflagraw[1] ^ xor_message_chunk(body[3:])
       messageid[items][1] = nextflagraw[1] + 256
       totaltime[items] = totaltime[items] + time.clock() - timenow
-      counter2 = counter2 + 1
+      counter2 = 1
       break
     elif body[:3] == inttoseqchar(nextflagraw[0] ^ int(initialflag,16)) or body[:3] == inttoseqchar(nextflagraw[1] ^ int(initialflag,16)) or body[:3] == inttoseqchar((nextflagraw[1] + 256) ^ int(initialflag,16)) :
       print("LAST FLAG")
-      if counter[items] != 4:
+      if counter[items] != counter2:
         fullbody[items] = fullbody[items] + " --ADA YANG HILANG-- "      
       print("Received [" + str(items) + "] : " + body)
       decipher[items] = ChaCha20.new(key = key, nonce = iv[items])
