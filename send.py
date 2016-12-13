@@ -75,12 +75,21 @@ i = 0
 while i != len(message)/32 + 1:
   #print(str(nextflagraw) + ' ----- ' ),
   if i == (len(message)/32):
+    #print("LAST FLAG")
     nextflagraw = nextflagraw ^ int(initialflag,16)
     skip = True
+    
   if i%4 == 0:
     # 4 karena kirim iv setiap 4 message sekali
+    #print("MASUK")
     if not skip:
+    #  print("MASUK SKIP")
       nextflagraw = IVraw + 256 * (i/4)
+    else:
+    #  print("masuk sini dong")
+      nextflagraw = (IVraw + 256 * (i/4)) ^ int(initialflag,16)
+    #if skip:
+    #  nextflagraw = IVraw + 256 * (i/4) ^ int(initialflag,16)
   #print(str(nextflagraw))
   #chop and encrypt
   #itemtobesent = inttoseqchar(nextflagraw) + obj.encrypt(message[(i)*32:(i+1)*32])
