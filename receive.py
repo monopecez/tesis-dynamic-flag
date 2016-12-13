@@ -3,6 +3,7 @@ import pika
 import time
 import base64
 import random
+import sys
 
 connection = pika.BlockingConnection(pika.ConnectionParameters('localhost'))
 channel = connection.channel()
@@ -43,7 +44,7 @@ def callback(ch, method, properties, body):
   print(body,end=''),
   global counter2
   ch.basic_ack(delivery_tag = method.delivery_tag)
-  errordi = 12
+  errordi = int(sys.argv[1])
   counter2 = counter2 + 1
   
   if body.find('IVIVIV') != -1:
@@ -62,7 +63,12 @@ def callback(ch, method, properties, body):
 
   for items in messageid:
     nextflagraw = messageid[items]
-    #print(nextflagraw)
+    print(nextflagraw[0],end=' ')
+    print(nextflagraw[0] ^ int(initialflag,16))
+    print(nextflagraw[1],end=' ')
+    print(nextflagraw[1] ^ int(initialflag,16))
+    print(nextflagraw[1] + 256,end=' ')
+    print((nextflagraw[1] + 256 )^ int(initialflag,16))
     if (body.find(inttoseqchar(nextflagraw[0]))) != -1:
       print("--NORMAL FLAG MATCH--")
       if counter2 == errordi:
@@ -104,7 +110,7 @@ def callback(ch, method, properties, body):
                       properties=pika.BasicProperties(delivery_mode = 2,))
       messageid[items][0] = nextflagraw[1] ^ xor_message_chunk(body[3:])
       messageid[items][1] = nextflagraw[1] + 256
-    elif body.find(inttoseqchar(nextflagraw[0] ^ int(initialflag,16))) != -1 or body.find(inttoseqchar(nextflagraw[1] ^ int(initialflag,16))) != -1 :
+    elif body.find(inttoseqchar(nextflagraw[0] ^ int(initialflag,16))) != -1 or body.find(inttoseqchar(nextflagraw[1] ^ int(initialflag,16))) != -1 or body.find(inttoseqchar((nextflagraw[1] + 256) ^ int(initialflag,16))) != -1 :
       print("--------LAST FLAG------------")
       if counter2 == errordi:
         #print("--CHAR CORRUPTED--"),

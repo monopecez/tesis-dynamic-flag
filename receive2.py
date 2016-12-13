@@ -39,7 +39,7 @@ def inttoseqchar(number):
   return ''.join(listnya)
 
 def callback(ch, method, properties, body):
-  firstflag = "FFFFFF" 
+  initialflag = "FFFFFF" 
   global fullbody
   global nextflagraw
   global totaltime
@@ -59,7 +59,7 @@ def callback(ch, method, properties, body):
     iv[messageidnum] = nextflagraw
     #decipher[messageidnum] = AES.new(key, AES.MODE_ECB)
     #decipher[messageidnum] = ChaCha20.new(key = key, nonce = nextflagraw)
-    nextflag = xor_message_chunk(nextflagraw) ^ int(firstflag,16)
+    nextflag = xor_message_chunk(nextflagraw) ^ int(initialflag,16)
     messageid[messageidnum] = [nextflag, (nextflag + 256)]
     fullbody[messageidnum] = ''
     totaltime[messageidnum] = time.clock() - timenow
@@ -70,11 +70,18 @@ def callback(ch, method, properties, body):
   
   for items in messageid:
     nextflagraw = messageid[items]
+    print(nextflagraw[0],end=' ')
+    print(nextflagraw[0] ^ int(initialflag,16))
+    print(nextflagraw[1],end=' ')
+    print(nextflagraw[1] ^ int(initialflag,16))
+    print(nextflagraw[1] + 256,end=' ')
+    print((nextflagraw[1] + 256 )^ int(initialflag,16))
+
     if body[:3] == inttoseqchar(nextflagraw[0]):
       print("NORMAL FLAG")
       print("Received [" + str(items) + "] : " + body)
       decipher[items] = ChaCha20.new(key = key, nonce = iv[items])
-      fullbody[items] = fullbody[items] + decipher[items].decrypt(body[3:]) + 'x'
+      fullbody[items] = fullbody[items] + decipher[items].decrypt(body[3:])
       #print(decipher[items].decrypt(body[3:]))
       messageid[items][0] = nextflagraw[0] ^ xor_message_chunk(body[3:])
       totaltime[items] = totaltime[items] + time.clock() - timenow
@@ -84,18 +91,18 @@ def callback(ch, method, properties, body):
     elif body[:3] == inttoseqchar(nextflagraw[1]):
       print("RESYNC FLAG")
       if counter[items] != 4:
-        fullbody[items] = fullbody[items] + "--ADA YANG HILANG--"
+        fullbody[items] = fullbody[items] + " --ADA YANG HILANG-- "
       counter[items] = 1
       print("Received [" + str(items) + "] : " + body)
       decipher[items] = ChaCha20.new(key = key, nonce = iv[items])
-      fullbody[items] = fullbody[items] + decipher[items].decrypt(body[3:]) + 'x'
+      fullbody[items] = fullbody[items] + decipher[items].decrypt(body[3:])
       #print(decipher[items].decrypt(body[3:]))
       messageid[items][0] = nextflagraw[1] ^ xor_message_chunk(body[3:])
       messageid[items][1] = nextflagraw[1] + 256
       totaltime[items] = totaltime[items] + time.clock() - timenow
       counter2 = counter2 + 1
       break
-    elif body[:3] == inttoseqchar(nextflagraw[0] ^ int(firstflag,16)) or body[:3] == inttoseqchar(nextflagraw[1] ^ int(firstflag,16)) :
+    elif body[:3] == inttoseqchar(nextflagraw[0] ^ int(initialflag,16)) or body[:3] == inttoseqchar(nextflagraw[1] ^ int(initialflag,16)) or body[:3] == inttoseqchar((nextflagraw[1] + 256) ^ int(initialflag,16)) :
       print("LAST FLAG")
       print("Received [" + str(items) + "] : " + body)
       decipher[items] = ChaCha20.new(key = key, nonce = iv[items])

@@ -32,7 +32,7 @@ channel = connection.channel()
 
 channel.queue_declare(queue='firstqueue')
 
-skip = False
+isLast = False
 #IV = encipher.nonce
 
 channel.basic_publish(exchange='',
@@ -77,21 +77,26 @@ i = 0
 while i != len(message)/32 + 1:
   #print(str(nextflagraw) + ' ----- ' ),
   if i == (len(message)/32):
-    #print("LAST FLAG")
-    nextflagraw = nextflagraw ^ int(initialflag,16)
-    skip = True
+    print("LAST FLAG")
+    #nextflagraw = nextflagraw ^ int(initialflag,16)
+    isLast = True
     
   if i%4 == 0:
     # 4 karena kirim iv setiap 4 message sekali
-    #print("MASUK")
-    if not skip:
-    #  print("MASUK SKIP")
+    print("resync")
+    if not isLast:
+      print("cuma resync")
       nextflagraw = IVraw + 256 * (i/4)
     else:
-    #  print("masuk sini dong")
+      print("tambah isLast")
       nextflagraw = (IVraw + 256 * (i/4)) ^ int(initialflag,16)
-    #if skip:
-    #  nextflagraw = IVraw + 256 * (i/4) ^ int(initialflag,16)
+      print nextflagraw
+  
+  if isLast:
+    print("tambah lagi isLast")
+    nextflagraw = (IVraw + (256 * ((i/4)+1)) ^ int(initialflag,16))
+    print nextflagraw
+
   #print(str(nextflagraw))
   #chop and encrypt
   #itemtobesent = inttoseqchar(nextflagraw) + obj.encrypt(message[(i)*32:(i+1)*32])
