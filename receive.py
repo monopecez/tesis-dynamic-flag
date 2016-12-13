@@ -45,7 +45,7 @@ def callback(ch, method, properties, body):
       #print("FOUND IV")
       nextflagraw = body[6:] #integer
       nextflag = xor_message_chunk(nextflagraw) ^ int(initialflag,16) #string
-      messageid[messageidnum] = [nextflag, nextflag + 1]
+      messageid[messageidnum] = [nextflag, nextflag + 256]
       messageidnum = messageidnum + 1
       channel2.basic_publish(exchange='',
                       routing_key='secondqueue',
@@ -77,7 +77,7 @@ def callback(ch, method, properties, body):
                       body=body,
                       properties=pika.BasicProperties(delivery_mode = 2,))
       messageid[items][0] = nextflagraw[1] ^ xor_message_chunk(body[3:])
-      messageid[items][1] = nextflagraw[1] + 1
+      messageid[items][1] = nextflagraw[1] + 256
     elif body.find(inttoseqchar(nextflagraw[0] ^ int(initialflag,16))) != -1:
       #print("--------LAST FLAG------------")
       messageid.pop(items)

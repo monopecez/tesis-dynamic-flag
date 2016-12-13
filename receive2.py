@@ -50,7 +50,7 @@ def callback(ch, method, properties, body):
     nextflagraw = body[6:] # nextflagraw = nonce
     decipher[messageidnum] = ChaCha20.new(key = key, nonce = nextflagraw)
     nextflag = xor_message_chunk(nextflagraw) ^ int(firstflag,16)
-    messageid[messageidnum] = [nextflag, nextflag + 1]
+    messageid[messageidnum] = [nextflag, nextflag + 256]
     fullbody[messageidnum] = ''
     totaltime[messageidnum] = time.clock() - timenow
     messageidnum = messageidnum + 1
@@ -71,7 +71,7 @@ def callback(ch, method, properties, body):
       fullbody[items] = fullbody[items] + body[3:]
       #print(obj.decrypt(body[3:]))
       messageid[items][0] = nextflagraw[1] ^ xor_message_chunk(body[3:])
-      messageid[items][1] = nextflagraw[1] + 1
+      messageid[items][1] = nextflagraw[1] + 256
       totaltime[items] = totaltime[items] + time.clock() - timenow
       break
     elif body[:3] == inttoseqchar(nextflagraw[0] ^ int(firstflag,16)):

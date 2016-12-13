@@ -56,10 +56,9 @@ try:
   elif sys.argv[1] == 'short5':
     message = "0123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789"
   elif sys.argv[1] == 'short6':
-    message = "01234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
-
-    Keterangan merupakan unsur kalimat yang memberikan informasi lebih lanjut tentang suatu yang dinyatakan dalam kalimat; misalnya, memberi informasi tentang t.
-    
+    message = "01234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"    
+  elif sys.argv[1] == 'long':
+    message = 100*"01234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
 
 except:
   message = "This page contains examples on basic concepts of C programming like: loops, functions, pointers, structures etc. All the examples in this page are tested and verified on GNU GCC compiler, although almost every program on in this website will work on any compiler you use. Feel free to copy the source code and execute it in your device."
@@ -81,7 +80,7 @@ while i != len(message)/32 + 1:
   if i%4 == 0:
     # 4 karena kirim iv setiap 4 message sekali
     if not skip:
-      nextflagraw = IVraw + i/4
+      nextflagraw = IVraw + 256 * (i/4)
   #print(str(nextflagraw))
   #chop and encrypt
   #itemtobesent = inttoseqchar(nextflagraw) + obj.encrypt(message[(i)*32:(i+1)*32])
@@ -92,7 +91,7 @@ while i != len(message)/32 + 1:
                       body= itemtobesent,
                       properties=pika.BasicProperties(delivery_mode = 2,))
   print("[v] %s is sent" % itemtobesent)
-  time.sleep(random.uniform(0,1.5))
+  time.sleep(random.uniform(0,0.5))
   nextflagraw = nextflagraw ^ xor_message_chunk(itemtobesent[3:])
   #print(nextflagraw)
   body = message[(i)*32:(i+1)*32]
