@@ -24,8 +24,9 @@ def inttoseqchar(number):
 
 key = 'secretkey123456!' + 'secretkey123456!'
 obj = AES.new(key, AES.MODE_ECB)
-IV = "a9cd5e3cfb793413".decode('hex')
-encipher = ChaCha20.new(key = key, nonce=IV)
+#IV = "a9cd5e3cfb793413".decode('hex')
+#encipher = ChaCha20.new(key = key, nonce=IV)
+encipher = ChaCha20.new(key = key)
 
 connection = pika.BlockingConnection(pika.ConnectionParameters('localhost'))
 channel = connection.channel()
@@ -33,7 +34,7 @@ channel = connection.channel()
 channel.queue_declare(queue='firstqueue')
 
 isLast = False
-#IV = encipher.nonce
+IV = encipher.nonce
 
 channel.basic_publish(exchange='',
                       routing_key='firstqueue',

@@ -17,7 +17,7 @@ key = 'secretkey123456!' + 'secretkey123456!'
 #obj = AES.new(key, AES.MODE_ECB)
 
 counter = dict()
-counter2 = 0
+counter2 = dict()
 messageid = dict()
 messageidnum = 1
 fullbody = dict()
@@ -64,8 +64,9 @@ def callback(ch, method, properties, body):
     fullbody[messageidnum] = ''
     totaltime[messageidnum] = time.clock() - timenow
     counter[messageidnum] = 0
+    counter2[messageidnum] = 0
+
     messageidnum = messageidnum + 1
-    counter2 = 0
     #print(nextflagraw)
   
   for items in messageid:
@@ -88,7 +89,7 @@ def callback(ch, method, properties, body):
       messageid[items][0] = nextflagraw[0] ^ xor_message_chunk(body[3:])
       totaltime[items] = totaltime[items] + time.clock() - timenow
       counter[items] = counter[items] + 1
-      counter2 = counter2 + 1
+      counter2[items] = counter2[items] + 1
       break
     elif body[:3] == inttoseqchar(nextflagraw[1]):
       print("RESYNC FLAG")
@@ -102,11 +103,11 @@ def callback(ch, method, properties, body):
       messageid[items][0] = nextflagraw[1] ^ xor_message_chunk(body[3:])
       messageid[items][1] = nextflagraw[1] + 256
       totaltime[items] = totaltime[items] + time.clock() - timenow
-      counter2 = 1
+      counter2[items] = 1
       break
     elif body[:3] == inttoseqchar(nextflagraw[0] ^ int(initialflag,16)) or body[:3] == inttoseqchar(nextflagraw[1] ^ int(initialflag,16)) or body[:3] == inttoseqchar((nextflagraw[1] + 256) ^ int(initialflag,16)) :
       print("LAST FLAG")
-      if counter[items] != counter2:
+      if counter[items] != counter2[items]:
         fullbody[items] = fullbody[items] + " --ADA YANG HILANG-- "      
       print("Received [" + str(items) + "] : " + body)
       decipher[items] = ChaCha20.new(key = key, nonce = iv[items])
