@@ -44,8 +44,8 @@ def callback(ch, method, properties, body):
   print(body,end=''),
   global counter2
   ch.basic_ack(delivery_tag = method.delivery_tag)
-  #errordi = int(sys.argv[1])
-  errordi = 0.1
+  #errordi = 0.1
+  errordi = int(sys.argv[1])
   counter2 = counter2 + 1
   
   if body.find('IVIVIV') != -1:
@@ -75,7 +75,8 @@ def callback(ch, method, properties, body):
     '''
     if (body.find(inttoseqchar(nextflagraw[0]))) != -1:
       print("--NORMAL FLAG MATCH--")
-      if random.random() < errordi:
+      if counter2 == errordi:
+      #if random.random() < errordi:
         #print("--CHAR CORRUPTED--")
         nochartobecorrupted = random.randint(3,len(body))
         if nochartobecorrupted == len(body):
@@ -98,7 +99,8 @@ def callback(ch, method, properties, body):
       #print (str(nextflag) + " ---- " + inttoseqchar(nextflagraw))
     elif (body.find(inttoseqchar(nextflagraw[1]))) != -1:
       print("--resync--")
-      if random.random() < errordi:
+      if counter2 == errordi:
+      #if random.random() < errordi:
         #print("--CHAR CORRUPTED--"),
         nochartobecorrupted = random.randint(3,len(body))
         if nochartobecorrupted == len(body):
@@ -116,7 +118,8 @@ def callback(ch, method, properties, body):
       messageid[items][1] = nextflagraw[1] + 256
     elif body.find(inttoseqchar(nextflagraw[0] ^ int(initialflag,16))) != -1 or body.find(inttoseqchar(nextflagraw[1] ^ int(initialflag,16))) != -1 or body.find(inttoseqchar((nextflagraw[1] + 256) ^ int(initialflag,16))) != -1 :
       print("--------LAST FLAG------------")
-      if random.random() < errordi:
+      if counter2 == errordi:
+      #if random.random() < errordi:
         #print("--CHAR CORRUPTED--"),
         nochartobecorrupted = random.randint(3,len(body))
         if nochartobecorrupted == len(body):

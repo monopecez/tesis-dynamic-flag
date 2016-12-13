@@ -77,7 +77,7 @@ i = 0
 while i != len(message)/32 + 1:
   #print(str(nextflagraw) + ' ----- ' ),
   if i == (len(message)/32):
-    print("LAST FLAG")
+    #print("LAST FLAG")
     #nextflagraw = nextflagraw ^ int(initialflag,16)
     isLast = True
     
