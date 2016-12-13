@@ -104,6 +104,8 @@ def callback(ch, method, properties, body):
       break
     elif body[:3] == inttoseqchar(nextflagraw[0] ^ int(initialflag,16)) or body[:3] == inttoseqchar(nextflagraw[1] ^ int(initialflag,16)) or body[:3] == inttoseqchar((nextflagraw[1] + 256) ^ int(initialflag,16)) :
       print("LAST FLAG")
+      if counter[items] != 4:
+        fullbody[items] = fullbody[items] + " --ADA YANG HILANG-- "      
       print("Received [" + str(items) + "] : " + body)
       decipher[items] = ChaCha20.new(key = key, nonce = iv[items])
       fullbody[items] = fullbody[items] + decipher[items].decrypt(body[3:])
