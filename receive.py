@@ -41,7 +41,7 @@ def callback(ch, method, properties, body):
   global messageid
   #print (str(nextflagraw))
   #print(body)
-  print(body,end=''),
+  #print(body,end=''),
   global counter2
   ch.basic_ack(delivery_tag = method.delivery_tag)
   #errordi = 0.1
@@ -58,7 +58,7 @@ def callback(ch, method, properties, body):
                       routing_key='secondqueue',
                       body=body,
                       properties=pika.BasicProperties(delivery_mode = 2,))
-      print()
+      #print()
       counter2 = 0
       #print (nextflag) #string
       #print (nextflagraw) #integer
@@ -74,7 +74,7 @@ def callback(ch, method, properties, body):
     print((nextflagraw[1] + 256 )^ int(initialflag,16))
     '''
     if (body.find(inttoseqchar(nextflagraw[0]))) != -1:
-      print("--NORMAL FLAG MATCH--")
+      #print("--NORMAL FLAG MATCH--")
       if counter2 == errordi:
       #if random.random() < errordi:
         #print("--CHAR CORRUPTED--")
@@ -90,6 +90,7 @@ def callback(ch, method, properties, body):
                       routing_key='secondqueue',
                       body=body,
                       properties=pika.BasicProperties(delivery_mode = 2,))
+      #print(body,end=''),
       #print(nextflagraw)
       #print(xor_message_chunk(body[4:]))
       messageid[items][0] = nextflagraw[0] ^ xor_message_chunk(body[3:])
@@ -98,7 +99,7 @@ def callback(ch, method, properties, body):
       break
       #print (str(nextflag) + " ---- " + inttoseqchar(nextflagraw))
     elif (body.find(inttoseqchar(nextflagraw[1]))) != -1:
-      print("--resync--")
+      #print("--resync--")
       if counter2 == errordi:
       #if random.random() < errordi:
         #print("--CHAR CORRUPTED--"),
@@ -114,10 +115,11 @@ def callback(ch, method, properties, body):
                       routing_key='secondqueue',
                       body=body,
                       properties=pika.BasicProperties(delivery_mode = 2,))
+      #print(body,end=''),
       messageid[items][0] = nextflagraw[1] ^ xor_message_chunk(body[3:])
       messageid[items][1] = nextflagraw[1] + 256
     elif body.find(inttoseqchar(nextflagraw[0] ^ int(initialflag,16))) != -1 or body.find(inttoseqchar(nextflagraw[1] ^ int(initialflag,16))) != -1 or body.find(inttoseqchar((nextflagraw[1] + 256) ^ int(initialflag,16))) != -1 :
-      print("--------LAST FLAG------------")
+      #print("--------LAST FLAG------------")
       if counter2 == errordi:
       #if random.random() < errordi:
         #print("--CHAR CORRUPTED--"),
@@ -134,7 +136,9 @@ def callback(ch, method, properties, body):
                       routing_key='secondqueue',
                       body=body,
                       properties=pika.BasicProperties(delivery_mode = 2,))
+      #print(body,end=''),
       break
+  print(body,end=''),
 
 
 channel.basic_consume(callback,

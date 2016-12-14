@@ -23,10 +23,11 @@ def inttoseqchar(number):
   return ''.join(listnya)
 
 key = 'secretkey123456!' + 'secretkey123456!'
-obj = AES.new(key, AES.MODE_ECB)
+#encipher= AES.new(key, AES.MODE_ECB)
 #IV = "a9cd5e3cfb793413".decode('hex')
-#encipher = ChaCha20.new(key = key, nonce=IV)
-encipher = ChaCha20.new(key = key)
+IV = "7365c71905dd1e4c".decode('hex')
+encipher = ChaCha20.new(key = key, nonce=IV)
+#encipher = ChaCha20.new(key = key)
 
 connection = pika.BlockingConnection(pika.ConnectionParameters('localhost'))
 channel = connection.channel()
@@ -34,7 +35,7 @@ channel = connection.channel()
 channel.queue_declare(queue='firstqueue')
 
 isLast = False
-IV = encipher.nonce
+#IV = encipher.nonce
 
 channel.basic_publish(exchange='',
                       routing_key='firstqueue',
@@ -62,7 +63,10 @@ try:
     message = "01234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"    
   elif sys.argv[1] == 'long':
     message = 10*"01234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
-
+  elif sys.argv[1] == 'abjad':
+    message = 11*"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+  elif sys.argv[1] == 'numb':
+    message = 23*"01234567890123456789"
 except:
   message = "This page contains examples on basic concepts of C programming like: loops, functions, pointers, structures etc. All the examples in this page are tested and verified on GNU GCC compiler, although almost every program on in this website will work on any compiler you use. Feel free to copy the source code and execute it in your device."
 
@@ -81,7 +85,8 @@ while i != len(message)/32 + 1:
     #print("LAST FLAG")
     #nextflagraw = nextflagraw ^ int(initialflag,16)
     isLast = True
-    
+  
+   
   if i%4 == 0:
     # 4 karena kirim iv setiap 4 message sekali
     #print("resync")
@@ -93,6 +98,7 @@ while i != len(message)/32 + 1:
       nextflagraw = (IVraw + 256 * (i/4)) ^ int(initialflag,16)
       #print nextflagraw
   
+
   if isLast:
     #print("tambah lagi isLast")
     nextflagraw = (IVraw + (256 * ((i/4)+1)) ^ int(initialflag,16))
@@ -102,6 +108,7 @@ while i != len(message)/32 + 1:
   #chop and encrypt
   #itemtobesent = inttoseqchar(nextflagraw) + obj.encrypt(message[(i)*32:(i+1)*32])
   encipher = ChaCha20.new(key = key, nonce = IV)
+
   itemtobesent = inttoseqchar(nextflagraw) + encipher.encrypt(message[(i)*32:(i+1)*32])
   channel.basic_publish(exchange='',
                       routing_key='firstqueue',
@@ -114,3 +121,6 @@ while i != len(message)/32 + 1:
   #print(nextflagraw)
   body = message[(i)*32:(i+1)*32]
   i = i + 1
+
+connection.close()
+input('Press ENTER to exit')

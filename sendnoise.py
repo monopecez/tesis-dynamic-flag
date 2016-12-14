@@ -11,7 +11,9 @@ channel = connection.channel()
 channel.queue_declare(queue='firstqueue')
 i = 0
 
-while True:
+time.clock()
+
+while time.clock() < 5:
   message = os.urandom(int(random.uniform(1,20)*3))
   channel.basic_publish(exchange='',
                       routing_key='firstqueue',
@@ -23,3 +25,4 @@ while True:
   time.sleep(0.1)
 
 connection.close()
+input('Press ENTER to exit')

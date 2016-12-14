@@ -53,12 +53,12 @@ def callback(ch, method, properties, body):
   timenow = time.clock()
 
   if body[:6] == 'IVIVIV':
-    print("IV")
-    print(body[6:])
+    #print("IV")
+    #print(body[6:])
     nextflagraw = body[6:] # nextflagraw = nonce
     iv[messageidnum] = nextflagraw
     #decipher[messageidnum] = AES.new(key, AES.MODE_ECB)
-    #decipher[messageidnum] = ChaCha20.new(key = key, nonce = nextflagraw)
+    decipher[messageidnum] = ChaCha20.new(key = key, nonce = nextflagraw)
     nextflag = xor_message_chunk(nextflagraw) ^ int(initialflag,16)
     messageid[messageidnum] = [nextflag, (nextflag + 256)]
     fullbody[messageidnum] = ''
@@ -81,7 +81,7 @@ def callback(ch, method, properties, body):
     '''
 
     if body[:3] == inttoseqchar(nextflagraw[0]):
-      print("NORMAL FLAG")
+      #print("NORMAL FLAG")
       print("Received [" + str(items) + "] : " + body)
       decipher[items] = ChaCha20.new(key = key, nonce = iv[items])
       fullbody[items] = fullbody[items] + decipher[items].decrypt(body[3:])
@@ -92,7 +92,7 @@ def callback(ch, method, properties, body):
       counter2[items] = counter2[items] + 1
       break
     elif body[:3] == inttoseqchar(nextflagraw[1]):
-      print("RESYNC FLAG")
+      #print("RESYNC FLAG")
       if counter[items] != 4:
         fullbody[items] = fullbody[items] + " --ADA YANG HILANG-- "
       counter[items] = 1
@@ -106,10 +106,11 @@ def callback(ch, method, properties, body):
       counter2[items] = 1
       break
     elif body[:3] == inttoseqchar(nextflagraw[0] ^ int(initialflag,16)) or body[:3] == inttoseqchar(nextflagraw[1] ^ int(initialflag,16)) or body[:3] == inttoseqchar((nextflagraw[1] + 256) ^ int(initialflag,16)) :
-      print("LAST FLAG")
+      #print("LAST FLAG")
       if counter[items] != counter2[items]:
         fullbody[items] = fullbody[items] + " --ADA YANG HILANG-- "      
       print("Received [" + str(items) + "] : " + body)
+      print("Printing message[" + str(items) + "] : ")
       decipher[items] = ChaCha20.new(key = key, nonce = iv[items])
       fullbody[items] = fullbody[items] + decipher[items].decrypt(body[3:])
       print(fullbody[items])
