@@ -123,4 +123,3 @@ while i != len(message)/32 + 1:
   i = i + 1
 
 connection.close()
-input('Press ENTER to exit')
