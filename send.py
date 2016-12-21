@@ -35,7 +35,7 @@ channel = connection.channel()
 channel.queue_declare(queue='firstqueue')
 
 isLast = False
-#IV = encipher.nonce
+IV = encipher.nonce
 
 channel.basic_publish(exchange='',
                       routing_key='firstqueue',
@@ -64,9 +64,9 @@ try:
   elif sys.argv[1] == 'long':
     message = 10*"01234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
   elif sys.argv[1] == 'abjad':
-    message = 11*"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    message = 9*"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
   elif sys.argv[1] == 'numb':
-    message = 23*"01234567890123456789"
+    message = 19*"01234567890123456789"
 except:
   message = "This page contains examples on basic concepts of C programming like: loops, functions, pointers, structures etc. All the examples in this page are tested and verified on GNU GCC compiler, although almost every program on in this website will work on any compiler you use. Feel free to copy the source code and execute it in your device."
 
@@ -123,3 +123,4 @@ while i != len(message)/32 + 1:
   i = i + 1
 
 connection.close()
+input("press Enter to exit")

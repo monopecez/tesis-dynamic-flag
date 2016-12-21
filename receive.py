@@ -77,8 +77,9 @@ def callback(ch, method, properties, body):
       #print("--NORMAL FLAG MATCH--")
       if counter2 == errordi:
       #if random.random() < errordi:
-        #print("--CHAR CORRUPTED--")
-        nochartobecorrupted = random.randint(3,len(body))
+        #print("--CHAR CORRUPTED--"),
+        nochartobecorrupted = random.randint(0,2)#(3,len(body))
+        #print(nochartobecorrupted)
         if nochartobecorrupted == len(body):
           nochartobecorrupted = nochartobecorrupted - 1
         #print(nochartobecorrupted)
