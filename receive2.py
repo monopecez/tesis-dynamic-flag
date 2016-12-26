@@ -59,8 +59,9 @@ def callback(ch, method, properties, body):
     iv[messageidnum] = nextflagraw
     #decipher[messageidnum] = AES.new(key, AES.MODE_ECB)
     decipher[messageidnum] = ChaCha20.new(key = key, nonce = nextflagraw)
-    nextflag = xor_message_chunk(nextflagraw) ^ int(initialflag,16)
-    messageid[messageidnum] = [nextflag, (nextflag + 256)]
+    nextflag = (xor_message_chunk(nextflagraw) ^ int(initialflag,16))
+    messageid[messageidnum] = [nextflag % 16777216, (nextflag + 256) % 16777216]
+    #print(messageid[messageidnum])
     fullbody[messageidnum] = ''
     totaltime[messageidnum] = time.clock() - timenow
     counter[messageidnum] = 0
@@ -86,7 +87,7 @@ def callback(ch, method, properties, body):
       decipher[items] = ChaCha20.new(key = key, nonce = iv[items])
       fullbody[items] = fullbody[items] + decipher[items].decrypt(body[3:])
       #print(decipher[items].decrypt(body[3:]))
-      messageid[items][0] = nextflagraw[0] ^ xor_message_chunk(body[3:])
+      messageid[items][0] = (nextflagraw[0] ^ xor_message_chunk(body[3:])) % 16777216
       totaltime[items] = totaltime[items] + time.clock() - timenow
       counter[items] = counter[items] + 1
       counter2[items] = counter2[items] + 1
@@ -100,8 +101,8 @@ def callback(ch, method, properties, body):
       decipher[items] = ChaCha20.new(key = key, nonce = iv[items])
       fullbody[items] = fullbody[items] + decipher[items].decrypt(body[3:])
       #print(decipher[items].decrypt(body[3:]))
-      messageid[items][0] = nextflagraw[1] ^ xor_message_chunk(body[3:])
-      messageid[items][1] = nextflagraw[1] + 256
+      messageid[items][0] = (nextflagraw[1] ^ xor_message_chunk(body[3:])) % 16777216
+      messageid[items][1] = (nextflagraw[1] + 256)  % 16777216
       totaltime[items] = totaltime[items] + time.clock() - timenow
       counter2[items] = 1
       break

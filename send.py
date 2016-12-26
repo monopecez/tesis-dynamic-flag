@@ -24,9 +24,10 @@ def inttoseqchar(number):
 
 key = 'secretkey123456!' + 'secretkey123456!'
 #encipher= AES.new(key, AES.MODE_ECB)
-#IV = "a9cd5e3cfb793413".decode('hex')
+#####IV = "a9cd5e3cfb793413".decode('hex')
 IV = "7365c71905dd1e4c".decode('hex')
-encipher = ChaCha20.new(key = key, nonce=IV)
+#IV = "0000ffffff000000".decode('hex')
+#encipher = ChaCha20.new(key = key, nonce=IV)
 #encipher = ChaCha20.new(key = key)
 
 connection = pika.BlockingConnection(pika.ConnectionParameters('localhost'))
@@ -35,7 +36,7 @@ channel = connection.channel()
 channel.queue_declare(queue='firstqueue')
 
 isLast = False
-IV = encipher.nonce
+#IV = encipher.nonce
 
 channel.basic_publish(exchange='',
                       routing_key='firstqueue',
@@ -104,9 +105,12 @@ while i != len(message)/32 + 1:
     nextflagraw = (IVraw + (256 * ((i/4)+1)) ^ int(initialflag,16))
     #print nextflagraw
 
+  nextflagraw = nextflagraw % 16777216
+
   #print(str(nextflagraw))
   #chop and encrypt
   #itemtobesent = inttoseqchar(nextflagraw) + obj.encrypt(message[(i)*32:(i+1)*32])
+  #encipher = AES.new(key, AES.MODE_ECB)
   encipher = ChaCha20.new(key = key, nonce = IV)
 
   itemtobesent = inttoseqchar(nextflagraw) + encipher.encrypt(message[(i)*32:(i+1)*32])
