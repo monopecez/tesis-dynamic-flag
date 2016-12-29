@@ -13,7 +13,7 @@ i = 0
 
 time.clock()
 
-while time.clock() < 5:
+while True: #time.clock() < 5:
   message = os.urandom(int(random.uniform(1,20)*3))
   channel.basic_publish(exchange='',
                       routing_key='firstqueue',
@@ -25,4 +25,4 @@ while time.clock() < 5:
   time.sleep(0.1)
 
 connection.close()
-input('Press ENTER to exit')
+#input('Press ENTER to exit')

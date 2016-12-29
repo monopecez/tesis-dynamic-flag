@@ -25,10 +25,10 @@ def inttoseqchar(number):
 key = 'secretkey123456!' + 'secretkey123456!'
 #encipher= AES.new(key, AES.MODE_ECB)
 #####IV = "a9cd5e3cfb793413".decode('hex')
-IV = "7365c71905dd1e4c".decode('hex')
+#IV = "7365c71905dd1e4c".decode('hex')
 #IV = "0000ffffff000000".decode('hex')
 #encipher = ChaCha20.new(key = key, nonce=IV)
-#encipher = ChaCha20.new(key = key)
+encipher = ChaCha20.new(key = key)
 
 connection = pika.BlockingConnection(pika.ConnectionParameters('localhost'))
 channel = connection.channel()
@@ -36,7 +36,7 @@ channel = connection.channel()
 channel.queue_declare(queue='firstqueue')
 
 isLast = False
-#IV = encipher.nonce
+IV = encipher.nonce
 
 channel.basic_publish(exchange='',
                       routing_key='firstqueue',
@@ -71,6 +71,14 @@ try:
 except:
   message = "This page contains examples on basic concepts of C programming like: loops, functions, pointers, structures etc. All the examples in this page are tested and verified on GNU GCC compiler, although almost every program on in this website will work on any compiler you use. Feel free to copy the source code and execute it in your device."
 
+noresync = False
+'''
+try:
+  if sys.argv[2] == "noresync":
+    noresync = True
+except:
+  noresync = False
+'''
 
 #message = "This page contains examples on basic concepts" # of C programming like: loops, functions, pointers, structures etc. All the examples in this page are tested and verified on GNU GCC compiler, although almost every program on in this website will work on any compiler you use. Feel free to copy the source code and execute it in your device."
 #totalpadding = 32 - (len(message)%32)
@@ -84,26 +92,26 @@ while i != len(message)/32 + 1:
   #print(str(nextflagraw) + ' ----- ' ),
   if i == (len(message)/32):
     #print("LAST FLAG")
-    #nextflagraw = nextflagraw ^ int(initialflag,16)
+    if noresync:
+      nextflagraw = nextflagraw ^ int(initialflag,16)
     isLast = True
   
-   
-  if i%4 == 0:
-    # 4 karena kirim iv setiap 4 message sekali
-    #print("resync")
-    if not isLast:
-      #print("cuma resync")
-      nextflagraw = IVraw + 256 * (i/4)
-    else:
-      #print("tambah isLast")
-      nextflagraw = (IVraw + 256 * (i/4)) ^ int(initialflag,16)
-      #print nextflagraw
-  
+  if not noresync:
+    if i%4 == 0:
+      # 4 karena kirim iv setiap 4 message sekali
+      #print("resync")
+      if not isLast:
+        #print("cuma resync")
+        nextflagraw = IVraw + 256 * (i/4)
+      else:
+        #print("tambah isLast")
+        nextflagraw = (IVraw + 256 * (i/4)) ^ int(initialflag,16)
+        #print nextflagraw
 
-  if isLast:
-    #print("tambah lagi isLast")
-    nextflagraw = (IVraw + (256 * ((i/4)+1)) ^ int(initialflag,16))
-    #print nextflagraw
+    if isLast:
+      #print("tambah lagi isLast")
+      nextflagraw = (IVraw + (256 * ((i/4)+1)) ^ int(initialflag,16))
+      #print nextflagraw
 
   nextflagraw = nextflagraw % 16777216
 
@@ -127,4 +135,4 @@ while i != len(message)/32 + 1:
   i = i + 1
 
 connection.close()
-input("press Enter to exit")
+#input("press Enter to exit")
