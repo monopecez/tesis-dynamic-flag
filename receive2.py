@@ -1,3 +1,4 @@
+# -*- coding: windows-1251 -*-
 from __future__ import print_function
 import pika
 import time

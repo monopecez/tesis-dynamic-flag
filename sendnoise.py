@@ -5,7 +5,13 @@ import base64
 import time
 import random
 
-connection = pika.BlockingConnection(pika.ConnectionParameters('localhost'))
+credentials = pika.PlainCredentials('tesis','tesis')
+recipientaddr = '192.168.18.133'
+portaddr = 5672
+
+parameters = pika.ConnectionParameters(recipientaddr, portaddr,'/',credentials)
+
+connection = pika.BlockingConnection(parameters)
 channel = connection.channel()
 
 channel.queue_declare(queue='firstqueue')
