@@ -3,6 +3,7 @@ from __future__ import print_function
 import pika
 import time
 import base64
+import sys
 from Crypto.Cipher import AES
 from Crypto.Cipher import ChaCha20
 
@@ -38,6 +39,14 @@ def inttoseqchar(number):
   numberinhex = hex(number)[2:].zfill(6)
   listnya = [chr(int(numberinhex[i:i+2],16)) for i in range(0, 6, 2)]
   return ''.join(listnya)
+
+kefile = False
+try:
+  if sys.argv[1] == 'file':
+    filenya = open(sys.argv[2], 'wb')
+    kefile = True
+except:
+  pass
 
 def callback(ch, method, properties, body):
   initialflag = "FFFFFF" 
@@ -84,7 +93,7 @@ def callback(ch, method, properties, body):
 
     if body[:3] == inttoseqchar(nextflagraw[0]):
       #print("NORMAL FLAG")
-      print("Received [" + str(items) + "] : " + body)
+      #print("Received [" + str(items) + "] : " + body)
       decipher[items] = ChaCha20.new(key = key, nonce = iv[items])
       fullbody[items] = fullbody[items] + decipher[items].decrypt(body[3:])
       #print(decipher[items].decrypt(body[3:]))
@@ -98,7 +107,7 @@ def callback(ch, method, properties, body):
       if counter[items] != 4:
         fullbody[items] = fullbody[items] + " --ADA YANG HILANG-- "
       counter[items] = 1
-      print("Received [" + str(items) + "] : " + body)
+      #print("Received [" + str(items) + "] : " + body)
       decipher[items] = ChaCha20.new(key = key, nonce = iv[items])
       fullbody[items] = fullbody[items] + decipher[items].decrypt(body[3:])
       #print(decipher[items].decrypt(body[3:]))
@@ -111,17 +120,24 @@ def callback(ch, method, properties, body):
       #print("LAST FLAG")
       if counter[items] != counter2[items]:
         fullbody[items] = fullbody[items] + " --ADA YANG HILANG-- "      
-      print("Received [" + str(items) + "] : " + body)
-      print("Printing message[" + str(items) + "] : ")
+      #print("Received [" + str(items) + "] : " + body)
+      #print("Printing message[" + str(items) + "] : ")
       decipher[items] = ChaCha20.new(key = key, nonce = iv[items])
       fullbody[items] = fullbody[items] + decipher[items].decrypt(body[3:])
-      print(fullbody[items])
+      if kefile:
+        filenya.write(fullbody[items])
+        filenya.close()
+        fullbody.pop(items)
+        messageid.pop(items)
+        sys.exit(1)
+      else:
+        print(fullbody[items])
       #print(decipher[items].decrypt(body[3:]))
       #print("Decoded  [" + str(items) + "] : " + decipher[items].decrypt(fullbody[items]))
       fullbody.pop(items)
       messageid.pop(items)
       #print(str(items) + '-' + str(totaltime.pop(items) + time.clock() - timenow))
-      print(20*'-')
+      #print(20*'-')
       break
     totaltime[items] = totaltime[items] + time.clock() - timenow
 
@@ -130,5 +146,5 @@ def callback(ch, method, properties, body):
 channel2.basic_consume(callback,
                       queue="secondqueue")
 
-print ("waiting for message(s)...")
+#print ("waiting for message(s)...")
 channel2.start_consuming()

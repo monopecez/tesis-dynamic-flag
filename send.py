@@ -32,8 +32,8 @@ encipher = ChaCha20.new(key = key, nonce=IV)
 #encipher = ChaCha20.new(key = key)
 
 credentials = pika.PlainCredentials('tesis','tesis')
-#recipientaddr = '192.168.18.133'
-recipientaddr = 'localhost'
+recipientaddr = '192.168.18.133'
+#recipientaddr = 'localhost'
 portaddr = 5672
 
 parameters = pika.ConnectionParameters(recipientaddr, portaddr,'/',credentials)
@@ -76,7 +76,7 @@ try:
     message = "وأوضح الجهاز في نشرة إحصاءات السياحة الشهرية، أن عدد السائحين الذين زاروا مصر خلال أكتوبر الماضي، بلغ نحو 506.2 ألف سائح، مقارنة بعدد 437 ألف سائح لسبتمبر الماضي."
   elif sys.argv[1] == 'file':
     try:
-      message = open(sys.argv[2], 'r').read()
+      message = open(sys.argv[2], 'rb').read()
     except:
       print(sys.argv[2]) + " not found"
       notfound = True
@@ -156,7 +156,7 @@ if not notfound:
                         body= itemtobesent,
                         properties=pika.BasicProperties(delivery_mode = 2,))
     print("[v] %s is sent" % itemtobesent)
-    time.sleep(random.uniform(0,0.5))
+    time.sleep(random.uniform(0,0.001))
     nextflagraw = nextflagraw ^ xor_message_chunk(itemtobesent[3:])
     #print(nextflagraw)
     body = message[(i)*32:(i+1)*32]
