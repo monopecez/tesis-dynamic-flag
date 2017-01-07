@@ -10,13 +10,9 @@ from Crypto.Cipher import ChaCha20
 connection = pika.BlockingConnection(pika.ConnectionParameters('localhost'))
 channel2 = connection.channel()
 channel2.queue_declare(queue="secondqueue")
-time.clock()
-#fullbody = ''
 nextflagraw = int('ffffff',16)
-totaltime = dict()
 decipher = dict()
 key = 'secretkey123456!' + 'secretkey123456!'
-#obj = AES.new(key, AES.MODE_ECB)
 
 counter = dict()
 counter2 = dict()
@@ -52,7 +48,6 @@ def callback(ch, method, properties, body):
   initialflag = "FFFFFF" 
   global fullbody
   global nextflagraw
-  global totaltime
   global messageid
   global messageidnum
   global decipher
@@ -60,68 +55,41 @@ def callback(ch, method, properties, body):
   global counter2
   global counter
 
-  timenow = time.clock()
-
   if body[:6] == 'IVIVIV':
-    #print("IV")
-    #print(body[6:])
-    nextflagraw = body[6:] # nextflagraw = nonce
+    nextflagraw = body[6:]
     iv[messageidnum] = nextflagraw
-    #decipher[messageidnum] = AES.new(key, AES.MODE_ECB)
     decipher[messageidnum] = ChaCha20.new(key = key, nonce = nextflagraw)
     nextflag = (xor_message_chunk(nextflagraw) ^ int(initialflag,16))
     messageid[messageidnum] = [nextflag % 16777216, (nextflag + 256) % 16777216]
-    #print(messageid[messageidnum])
     fullbody[messageidnum] = ''
-    totaltime[messageidnum] = time.clock() - timenow
     counter[messageidnum] = 0
     counter2[messageidnum] = 0
-
     messageidnum = messageidnum + 1
-    #print(nextflagraw)
   
   for items in messageid:
     nextflagraw = messageid[items]
-    '''
-    print(nextflagraw[0],end=' ')
-    print(nextflagraw[0] ^ int(initialflag,16))
-    print(nextflagraw[1],end=' ')
-    print(nextflagraw[1] ^ int(initialflag,16))
-    print(nextflagraw[1] + 256,end=' ')
-    print((nextflagraw[1] + 256 )^ int(initialflag,16))
-    '''
-
     if body[:3] == inttoseqchar(nextflagraw[0]):
-      #print("NORMAL FLAG")
-      #print("Received [" + str(items) + "] : " + body)
       decipher[items] = ChaCha20.new(key = key, nonce = iv[items])
       fullbody[items] = fullbody[items] + decipher[items].decrypt(body[3:])
-      #print(decipher[items].decrypt(body[3:]))
       messageid[items][0] = (nextflagraw[0] ^ xor_message_chunk(body[3:])) % 16777216
-      totaltime[items] = totaltime[items] + time.clock() - timenow
       counter[items] = counter[items] + 1
       counter2[items] = counter2[items] + 1
       break
+
     elif body[:3] == inttoseqchar(nextflagraw[1]):
-      #print("RESYNC FLAG")
       if counter[items] != 4:
         fullbody[items] = fullbody[items] + " --ADA YANG HILANG-- "
       counter[items] = 1
-      #print("Received [" + str(items) + "] : " + body)
       decipher[items] = ChaCha20.new(key = key, nonce = iv[items])
       fullbody[items] = fullbody[items] + decipher[items].decrypt(body[3:])
-      #print(decipher[items].decrypt(body[3:]))
       messageid[items][0] = (nextflagraw[1] ^ xor_message_chunk(body[3:])) % 16777216
       messageid[items][1] = (nextflagraw[1] + 256)  % 16777216
-      totaltime[items] = totaltime[items] + time.clock() - timenow
       counter2[items] = 1
       break
+
     elif body[:3] == inttoseqchar(nextflagraw[0] ^ int(initialflag,16)) or body[:3] == inttoseqchar(nextflagraw[1] ^ int(initialflag,16)) or body[:3] == inttoseqchar((nextflagraw[1] + 256) ^ int(initialflag,16)) :
-      #print("LAST FLAG")
       if counter[items] != counter2[items]:
         fullbody[items] = fullbody[items] + " --ADA YANG HILANG-- "      
-      #print("Received [" + str(items) + "] : " + body)
-      #print("Printing message[" + str(items) + "] : ")
       decipher[items] = ChaCha20.new(key = key, nonce = iv[items])
       fullbody[items] = fullbody[items] + decipher[items].decrypt(body[3:])
       if kefile:
@@ -129,18 +97,12 @@ def callback(ch, method, properties, body):
         filenya.close()
         fullbody.pop(items)
         messageid.pop(items)
-        sys.exit(1)
+        exit()
       else:
         print(fullbody[items])
-      #print(decipher[items].decrypt(body[3:]))
-      #print("Decoded  [" + str(items) + "] : " + decipher[items].decrypt(fullbody[items]))
       fullbody.pop(items)
       messageid.pop(items)
-      #print(str(items) + '-' + str(totaltime.pop(items) + time.clock() - timenow))
-      #print(20*'-')
       break
-    totaltime[items] = totaltime[items] + time.clock() - timenow
-
   ch.basic_ack(delivery_tag = method.delivery_tag)
 
 channel2.basic_consume(callback,

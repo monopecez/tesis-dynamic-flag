@@ -39,119 +39,70 @@ def callback(ch, method, properties, body):
   global nextflagraw
   global messageidnum
   global messageid
-  #print (str(nextflagraw))
-  #print(body)
-  #print(body,end=''),
   global counter2
   ch.basic_ack(delivery_tag = method.delivery_tag)
-  errordi = 0
-  #errordi = int(sys.argv[1])
+  errordi = int(sys.argv[1])
   counter2 = counter2 + 1
   
   if body.find('IVIVIV') != -1:
       counter2 = 0
-      '''
       if counter2 == errordi:
-        nochartobecorrupted = 5
+        nochartobecorrupted = random.randint(0,len(body) - 1 )
         if nochartobecorrupted == len(body):
           nochartobecorrupted = nochartobecorrupted - 1
         chartobecorrupted = body[nochartobecorrupted]
         corruptedchar = chr(int(chartobecorrupted.encode('hex'),16) + 1)
-        #corruptedchar = chr(random.randint(0,255))
         body = body[:nochartobecorrupted] + corruptedchar + body[nochartobecorrupted+1:]
-      '''
-      #print("FOUND IV")
-      nextflagraw = body[6:] #integer
-      nextflag = xor_message_chunk(nextflagraw) ^ int(initialflag,16) #string
+      nextflagraw = body[6:] 
+      nextflag = xor_message_chunk(nextflagraw) ^ int(initialflag,16) 
       messageid[messageidnum] = [nextflag % 16777216, (nextflag + 256) % 16777216]
-      #print(messageid[messageidnum])
       messageidnum = messageidnum + 1
       channel2.basic_publish(exchange='',
                       routing_key='secondqueue',
                       body=body,
                       properties=pika.BasicProperties(delivery_mode = 2,))
-      #print()
-      #print (nextflag) #string
-      #print (nextflagraw) #integer
 
   for items in messageid:
     nextflagraw = messageid[items]
-    '''
-    print(nextflagraw[0],end=' ')
-    print(nextflagraw[0] ^ int(initialflag,16))
-    print(nextflagraw[1],end=' ')
-    print(nextflagraw[1] ^ int(initialflag,16))
-    print(nextflagraw[1] + 256,end=' ')
-    print((nextflagraw[1] + 256 )^ int(initialflag,16))
-    '''
     if (body[:3].find(inttoseqchar(nextflagraw[0]))) != -1:# and body[:3] != "IVI":
-      #print("--NORMAL FLAG MATCH--")
-      #if counter2 == errordi:
-      if random.random() < errordi:
-        #print("--CHAR CORRUPTED--"),
+      if counter2 == errordi:
         nochartobecorrupted = random.randint(3,len(body)-1)
-        #nochartobecorrupted = 27
-        #print(nochartobecorrupted)
-        #print(nochartobecorrupted)
-        #print(nochartobecorrupted)
         chartobecorrupted = body[nochartobecorrupted]
         corruptedchar = chr(int(chartobecorrupted.encode('hex'),16) + 1)
-        #corruptedchar = chr(random.randint(0,255))
         body = body[:nochartobecorrupted] + corruptedchar + body[nochartobecorrupted+1:]
       channel2.basic_publish(exchange='',
                       routing_key='secondqueue',
                       body=body,
                       properties=pika.BasicProperties(delivery_mode = 2,))
-      #print(body,end=''),
-      #print(nextflagraw)
-      #print(xor_message_chunk(body[4:]))
       messageid[items][0] = (nextflagraw[0] ^ xor_message_chunk(body[3:]))
-      #print(messageid[items])
-      #print('-----' + inttoseqchar(messageid[items]) + '-----')
       break
-      #print (str(nextflag) + " ---- " + inttoseqchar(nextflagraw))
     
     elif (body[:3].find(inttoseqchar(nextflagraw[1]))) != -1:
-      #print("--resync--")
-      #if counter2 == errordi:
-      if random.random() < errordi:
-        #print("--CHAR CORRUPTED--"),
+      if counter2 == errordi:
         nochartobecorrupted = random.randint(3,len(body)-1)
-        #print(nochartobecorrupted)
-        #print(nochartobecorrupted)
         chartobecorrupted = body[nochartobecorrupted]
         corruptedchar = chr(int(chartobecorrupted.encode('hex'),16) + 1)
-        #corruptedchar = chr(random.randint(0,255))
         body = body[:nochartobecorrupted] + corruptedchar + body[nochartobecorrupted+1:]
       channel2.basic_publish(exchange='',
                       routing_key='secondqueue',
                       body=body,
                       properties=pika.BasicProperties(delivery_mode = 2,))
-      #print(body,end=''),
       messageid[items][0] = (nextflagraw[1] ^ xor_message_chunk(body[3:])) % 16777216
       messageid[items][1] = (nextflagraw[1] + 256) % 16777216
+      break
     
     elif body[:3].find(inttoseqchar(nextflagraw[0] ^ int(initialflag,16))) != -1 or body[:3].find(inttoseqchar(nextflagraw[1] ^ int(initialflag,16))) != -1 or body.find(inttoseqchar((nextflagraw[1] + 256) ^ int(initialflag,16))) != -1 :
-      #print("--------LAST FLAG------------")
-      #if counter2 == errordi:
-      if random.random() < errordi:
-        #print("--CHAR CORRUPTED--"),
+      if counter2 == errordi:
         nochartobecorrupted = random.randint(3,len(body)-1)
-        #print(nochartobecorrupted)
         chartobecorrupted = body[nochartobecorrupted]
         corruptedchar = chr(int(chartobecorrupted.encode('hex'),16) + 1)
-        #corruptedchar = chr(random.randint(0,255))
         body = body[:nochartobecorrupted] + corruptedchar + body[nochartobecorrupted+1:]
       messageid.pop(items)
       channel2.basic_publish(exchange='',
                       routing_key='secondqueue',
                       body=body,
                       properties=pika.BasicProperties(delivery_mode = 2,))
-      #print(body,end=''),
       break
-    
-
-  #print(body)
   print(body,end=''),
 
 

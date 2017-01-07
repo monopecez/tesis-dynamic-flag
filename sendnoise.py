@@ -6,7 +6,8 @@ import time
 import random
 
 credentials = pika.PlainCredentials('tesis','tesis')
-recipientaddr = '192.168.18.133'
+recipientaddr = 'localhost'
+#recipientaddr = '192.168.18.133'
 portaddr = 5672
 
 parameters = pika.ConnectionParameters(recipientaddr, portaddr,'/',credentials)
@@ -19,7 +20,7 @@ i = 0
 
 time.clock()
 
-while True: #time.clock() < 5:
+while True:
   message = os.urandom(int(random.uniform(1,20)*3))
   channel.basic_publish(exchange='',
                       routing_key='firstqueue',
@@ -28,7 +29,6 @@ while True: #time.clock() < 5:
   print("%s" % message),
   i = i + 1
   print(i)
-  time.sleep(0.1)
 
 connection.close()
 #input('Press ENTER to exit')
