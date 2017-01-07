@@ -18,8 +18,6 @@ channel = connection.channel()
 channel.queue_declare(queue='firstqueue')
 i = 0
 
-time.clock()
-
 while True:
   message = os.urandom(int(random.uniform(1,20)*3))
   channel.basic_publish(exchange='',
@@ -27,8 +25,7 @@ while True:
                       body=message,
                       properties=pika.BasicProperties(delivery_mode = 2,))
   print("%s" % message),
-  i = i + 1
-  print(i)
+  time.sleep(random.uniform(0,0.5))
 
 connection.close()
 #input('Press ENTER to exit')

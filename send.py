@@ -79,7 +79,6 @@ except:
 
 try:
   if ''.join(sys.argv[1:]).find("noresync") != -1:
-    print("noresync")
     noresync = True
 except:
   noresync = False
@@ -116,12 +115,10 @@ while i != len(message)/32 + 1:
         nextflagraw = IVraw + 256 * (i/4)
       else:
         nextflagraw = (IVraw + 256 * (i/4)) ^ int(initialflag,16)
-
     if isLast:
       nextflagraw = (IVraw + (256 * ((i/4)+1)) ^ int(initialflag,16))
 
   nextflagraw = nextflagraw % 16777216
-
 
   encipher = ChaCha20.new(key = key, nonce = IV)
   itemtobesent = inttoseqchar(nextflagraw) + encipher.encrypt(message[(i)*32:(i+1)*32])
@@ -134,5 +131,6 @@ while i != len(message)/32 + 1:
   nextflagraw = nextflagraw ^ xor_message_chunk(itemtobesent[3:])
   body = message[(i)*32:(i+1)*32]
   i = i + 1
+  time.sleep(random.uniform(0,0.5))
 
 connection.close()

@@ -99,7 +99,7 @@ def callback(ch, method, properties, body):
         messageid.pop(items)
         exit()
       else:
-        print(fullbody[items])
+        print("printing[" + str(items) + "]: " + fullbody[items])
       fullbody.pop(items)
       messageid.pop(items)
       break
