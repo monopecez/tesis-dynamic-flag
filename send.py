@@ -131,6 +131,6 @@ while i != len(message)/32 + 1:
   nextflagraw = nextflagraw ^ xor_message_chunk(itemtobesent[3:])
   body = message[(i)*32:(i+1)*32]
   i = i + 1
-  time.sleep(random.uniform(0,0.5))
+  time.sleep(random.uniform(0,0.1))
 
 connection.close()

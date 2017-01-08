@@ -74,6 +74,7 @@ def callback(ch, method, properties, body):
       messageid[items][0] = (nextflagraw[0] ^ xor_message_chunk(body[3:])) % 16777216
       counter[items] = counter[items] + 1
       counter2[items] = counter2[items] + 1
+      #print("Received[" + str(items) + "]: " + body)
       break
 
     elif body[:3] == inttoseqchar(nextflagraw[1]):
@@ -85,6 +86,7 @@ def callback(ch, method, properties, body):
       messageid[items][0] = (nextflagraw[1] ^ xor_message_chunk(body[3:])) % 16777216
       messageid[items][1] = (nextflagraw[1] + 256)  % 16777216
       counter2[items] = 1
+      #print("Received[" + str(items) + "]: " + body)
       break
 
     elif body[:3] == inttoseqchar(nextflagraw[0] ^ int(initialflag,16)) or body[:3] == inttoseqchar(nextflagraw[1] ^ int(initialflag,16)) or body[:3] == inttoseqchar((nextflagraw[1] + 256) ^ int(initialflag,16)) :
@@ -99,7 +101,9 @@ def callback(ch, method, properties, body):
         messageid.pop(items)
         exit()
       else:
-        print("printing[" + str(items) + "]: " + fullbody[items])
+        print('xxx')
+        #print("Received[" + str(items) + "]: " + body)
+        print("Printing[" + str(items) + "]: " + fullbody[items])
       fullbody.pop(items)
       messageid.pop(items)
       break
