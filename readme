@@ -2,18 +2,20 @@ Program Stego-Kripto dengan Penanda Dinamis | Isman Junian Rahman
 
 Requirement:
 - python 2.7
+- package pika, pycryptodome, dan Crypto di python 
 - RabbitMQ
 
 Ada 4 file:
-- receive.py
-  menerima semua yang dikirimkan oleh sender (send.py) dan juga noise (sendnoise.py). kemudian akan dipilah antara message dan noise. Jika ditemukan message, maka akan di-forward ke receiver2 (receive2.py) untuk diproses/di-decode/di-decipher 
+- receive.py x
+  menerima semua yang dikirimkan oleh sender (send.py) dan juga noise (sendnoise.py). kemudian akan dipilah antara message dan noise. Jika ditemukan message, maka akan di-forward ke receiver2 (receive2.py) untuk diproses/di-decode/di-decipher. 
+  Program ini menerima satu parameter x berupa angka untuk mensimulasikan sebuah error saat transmisi. Gunakan -1 untuk penerimaan tanpa error, 0 untuk error di IV, 1 untuk di pecahan pesan pertama, dst. Sebagai contoh, "receive.py -1" akan menjalankan program tanpa adanya error pada sistem transmisi. Bab 4.1.3 di buku tesis.
 
 - receive2.py 
-  memproses semua pesan yang dikirimkan dari receiver (receive.py)
+  memproses semua pesan yang dikirimkan dari receiver (receive.py).
 
-- send.py
-  pengirim message. cukup jalankan 'send.py' maka akan mengirimkan pesan yang telah didefinisikan di program atau 'send.py "pesan_yang_akan_dikirim"' atau mengirimkan pesan yang telah disimpan dalam satu file dengan memanggil 'send.py file "namafile"'
-
+- send.py 
+  pengirim message. Cukup jalankan 'send.py' maka akan mengirimkan pesan yang telah didefinisikan di program (line 82) atau gunakan 'send.py "pesan_yang_akan_dikirim"'. Program juga dapat mengirim pesan yang telah disimpan didalam sebuah berkas(file) dengan perintah 'send.py file "lokasi/namafile"'. Parameter "noresync" bisa ditambahkan agar tidak ada penanda re-sync semisal 'send.py "pesan" noresync'.
+  Uncomment line 12 agar program memanggil sendnoise.py secara otomatis ketika akan melakukan pengiriman.
 
 - sendnoise.py
-  pengirim noise
+  generator noise dan mengirim noise.
