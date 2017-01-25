@@ -11,7 +11,7 @@ Ada 4 file:
   Program ini menerima satu parameter x berupa angka untuk mensimulasikan sebuah error saat transmisi. Gunakan -1 untuk penerimaan tanpa error, 0 untuk error di IV, 1 untuk di pecahan pesan pertama, dst. Sebagai contoh, "receive.py -1" akan menjalankan program tanpa adanya error pada sistem transmisi. Bab 4.1.3 di buku tesis.
 
 - receive2.py 
-  memproses semua pesan yang dikirimkan dari receiver (receive.py).
+  memproses semua pesan yang dikirimkan dari receiver (receive.py). Receive2 dapat merutekan output ke dalam sebuah file dengan memanggil 'receive2.py file "nama_file_output_yang_diinginkan"'. Gunakan parameter ini jika pesan yang dikirim adalah citra atau suara. 
 
 - send.py 
   pengirim message. Cukup jalankan 'send.py' maka akan mengirimkan pesan yang telah didefinisikan di program (line 82) atau gunakan 'send.py "pesan_yang_akan_dikirim"'. Program juga dapat mengirim pesan yang telah disimpan didalam sebuah berkas(file) dengan perintah 'send.py file "lokasi/namafile"'. Parameter "noresync" bisa ditambahkan agar tidak ada penanda re-sync semisal 'send.py "pesan" noresync'.
