@@ -5,7 +5,8 @@ import base64
 import time
 import random
 
-credentials = pika.PlainCredentials('tesis','tesis')
+#credentials = pika.PlainCredentials('tesis','tesis')
+credentials = pika.PlainCredentials('admin','admin')
 recipientaddr = 'localhost'
 #recipientaddr = '192.168.18.133'
 portaddr = 5672
@@ -25,7 +26,7 @@ while True:
                       body=message,
                       properties=pika.BasicProperties(delivery_mode = 2,))
   print("%s" % message),
-  time.sleep(random.uniform(0,0.5))
+  time.sleep(random.uniform(0,0.05))
 
 connection.close()
 #input('Press ENTER to exit')

@@ -101,7 +101,6 @@ def callback(ch, method, properties, body):
         messageid.pop(items)
         exit()
       else:
-        print('xxx')
         #print("Received[" + str(items) + "]: " + body)
         print("Printing[" + str(items) + "]: " + fullbody[items])
       fullbody.pop(items)
